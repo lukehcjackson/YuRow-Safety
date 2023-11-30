@@ -1,0 +1,44 @@
+Notes on API parameters and value thresholds
+
+DATAPOINT API (Weather monitoring):
+York Location ID: 310169
+
+JSON FORMAT:
+      Care about params:
+          Wind: G (Gust), S (Speed)
+          Rain and Snow and Electrical Storms: W (Weather Type):
+            RAIN: W=12 (Light rain) or W=13 (Heavy rain)
+            SNOW: W=24 (Light snow) or W=27 (Heavy snow)
+            ELECTRICAL STORMS: W=29 (Thunder shower day) or W=30 (Thunder)
+          Feels Like Temp: F
+          Visibility: V. Also consider W=5 or W=6 (mist or fog)
+            V=VP => RED, V=PO => Amber
+
+      Range of values:
+          WIND SPEED (S):
+            Green: 0-24mph. Amber: 24mph - 35mph. Red: >35mph.
+          WIND GUST (G):
+            Green: 0-30mph. Amber: 30mph - 40mph. Red: >40mph.
+          WEATHER TYPE (W):
+            RAIN:
+              Amber: Raining but not actually much of an issue (W=12). Red: >30mm per hour (W=13)
+            SNOW:
+              Green: No Snow. Amber: Moderate Snow. (W=24) Red: Heavy Snow that impedes visibility (W=27)
+            ELECTRICAL STORMS:
+              Red if any electrical storms (W=29 or W=30)
+          FEELS LIKE TEMP (F):
+            Green: 0-30c. Amber: >30c or 0 -> -6c, -7c -> -8c Red: <-8c or >40c
+          VISIBILITY (V):
+            Green: Good visibility. Amber: 250m visibility. (V=PO) Red: 5m visibility (V=VP)
+
+Doing a 3-hourly 5 day forecast means I can use:
+Current values (item 1)
+Values in 3 hours (item 2)
+Values in 12 hours (item 5)
+Values in 24 hours (9)
+Values in 48 hours (17)
+
+SiteRep -> DV -> Period -> [DAY] -> [VALUE SET]
+Essentially want the Rep values for the times listed above
+And then extract the useful data from them
+          
