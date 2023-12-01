@@ -1,12 +1,17 @@
 function callDataPointAPI() {
 
+    //weatherInfoArray stores multiple weatherInfo objects
+    //each weatherInfo object stores the relevant weather values and severities for one time period
+    weatherInfoArray = []
+
     const xhr = new XMLHttpRequest();
     //EXAMPLE 3 HOURLY 5 DAY FORECAST
     //const url = "http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/3840?res=3hourly&key=";
     //GET ALL SITES IN JSON FORMAT
     //const url = "http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/sitelist?key";
     //GET 3-HOURLY 5 DAY FORECAST FOR YORK
-    const url = "http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/310169?res=3hourly&key";
+    const url = "http://datapoint.metoffice.gov.uk/public/data/val/wxfcs/all/json/310169?res=3hourly&key=";
+    //consider changing url to use https if it still works
 
 
     xhr.open("GET", url);
@@ -15,14 +20,25 @@ function callDataPointAPI() {
     xhr.onload = function() {
         //alert(`Loaded: ${xhr.status} ${xhr.response}`);
         const response = xhr.response;
-        //console.log(response);
 
-        //output the Rep value for the current weather information
+        //parse the response as JSON
         responseObject = JSON.parse(response);
-        const current = responseObject["SiteRep"]["DV"]["Location"]["Period"][0]["Rep"][0];
-        //console.log(current);
 
-        evaluateDataPoint(current);
+        //calculate time of most recent measurement
+        //stores just the hour in 24hr time (so like 09 or 18)
+        //TODO: DOES THIS WORK WITH SINGLE DIGIT TIMES?????
+        timeOfMeasurement = responseObject["SiteRep"]["DV"]["dataDate"].toString();
+        const Tpos = timeOfMeasurement.indexOf("T");
+        timeOfMeasurement = timeOfMeasurement.slice(Tpos+1, Tpos+3);
+
+        //process the Rep value for the current weather information
+        const current = responseObject["SiteRep"]["DV"]["Location"]["Period"][0]["Rep"][0];
+        weatherInfoArray.push(evaluateDataPoint(current, timeOfMeasurement));
+
+        weatherInfoArray.push(evaluateDataPoint(current, timeOfMeasurement));
+        weatherInfoArray.push(evaluateDataPoint(current, timeOfMeasurement));
+
+        generateWeatherTable(weatherInfoArray);
 
       };
       
@@ -33,7 +49,7 @@ function callDataPointAPI() {
 }
 
 //takes a Rep object as input and evaluates each metric and gives it a green/amber/red rating
-function evaluateDataPoint(rep) {
+function evaluateDataPoint(rep, measuredTime) {
 
   const weatherType = rep["W"];
 
@@ -86,6 +102,7 @@ function evaluateDataPoint(rep) {
   //we want to store all of the relevant data in one data structure
   //which can be passed into the table generator
   const weatherInfo = {
+    time: measuredTime,
     speed: [],
     gust: [],
     temp: [],
@@ -209,8 +226,20 @@ function evaluateDataPoint(rep) {
     weatherInfo.visibility[1] = "G";
   }
 
-  generateWeatherTable(weatherInfo);
+  return weatherInfo;
 
+  //generateWeatherTable(weatherInfo);
+  //weatherInfoArray.push(weatherInfo);
+  //generateWeatherTable(weatherInfoArray);
+
+}
+
+function createCells(text) {
+  const cell = document.createElement("td");
+  const cellText = document.createTextNode(text);
+  cell.appendChild(cellText);
+  row.appendChild(cell);
+  console.log("created cell");
 }
 
 function generateWeatherTable(weatherInfo) {
@@ -219,29 +248,67 @@ function generateWeatherTable(weatherInfo) {
   //give the value for each cell
   //style each cell green/amber/red based on it's severity. time is styled based on the highest severity
 
-  console.log("generating");
-
   //get the table
   const weatherTable = document.getElementById("weatherTable");
 
   //create a table body
   const tblBody = document.createElement("tbody");
   //for the number of desired rows
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < weatherInfoArray.length; i++) {
     // creates a table row
-    const row = document.createElement("tr");
+    row = document.createElement("tr");
 
-    //for the number of elements in each row
-    for (let j = 0; j < 8; j++) {
-      // Create a <td> element and a text node, make the text
-      // node the contents of the <td>, and put the <td> at
-      // the end of the table row
-      const cell = document.createElement("td");
-      const cellText = document.createTextNode(`cell in row ${i}, column ${j}`);
-      console.log(weatherInfo.speed[1]);
-      cell.appendChild(cellText);
-      row.appendChild(cell);
+    //HAVE TO DO THIS MANUALLY BECAUSE YOU CAN'T ACCESS OBJECT'S PROPERTIES BY INDEX :(
+    //TIME:
+    const timeText = weatherInfoArray[i].time.concat(":00");
+    createCells(timeText);
+  
+    //WIND SPEED:
+    const speedText = weatherInfoArray[i].speed[0].toString().concat(" mph");
+    createCells(speedText);
+
+    //WIND GUST:
+    const gustText = weatherInfoArray[i].gust[0].toString().concat(" mph");
+    createCells(gustText);
+
+    //FEELS LIKE TEMPERATURE
+    const tempText = weatherInfoArray[i].temp[0].toString().concat(" °C");
+    createCells(tempText);
+
+    //RAIN
+    if (weatherInfoArray[i].rain[1] == "R") {
+      createCells("Heavy rain");
+    } else if (weatherInfoArray[i].rain[1] == "A") {
+      createCells("Moderate rain");
+    } else {
+      createCells("Okay");
     }
+
+    //SNOW
+    if (weatherInfoArray[i].snow[1] == "R") {
+      createCells("Heavy snow");
+    } else if (weatherInfoArray[i].snow[1] == "A") {
+      createCells("Moderate snow");
+    } else {
+      createCells("Okay");
+    }
+
+    //ELECTRICAL STORMS
+    if (weatherInfoArray[i].electricalStorms[1] == "R") {
+      createCells("Electrical storms likely");
+    } else {
+      createCells("Okay");
+    }
+
+    //VISIBILITY
+    if (weatherInfoArray[i].visibility[1] == "R") {
+      createCells("Very Poor Visibility");
+    } else if (weatherInfoArray[i].visibility[1] == "A") {
+        createCells("Poor Visibility");
+    } else {
+      createCells("Okay");
+    }
+    
 
     // add the row to the end of the table body
     tblBody.appendChild(row);
