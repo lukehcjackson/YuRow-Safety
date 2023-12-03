@@ -33,10 +33,68 @@ function callDataPointAPI() {
 
         //process the Rep value for the current weather information
         const current = responseObject["SiteRep"]["DV"]["Location"]["Period"][0]["Rep"][0];
-        weatherInfoArray.push(evaluateDataPoint(current, timeOfMeasurement));
+        //weatherInfoArray.push(evaluateDataPoint(current, timeOfMeasurement));
 
-        weatherInfoArray.push(evaluateDataPoint(current, timeOfMeasurement));
-        weatherInfoArray.push(evaluateDataPoint(current, timeOfMeasurement));
+        
+        //[0]   [1]   [2]   [3]      [5]      [9]      [17]
+        const todayMeasurement = responseObject["SiteRep"]["DV"]["Location"]["Period"][0]["Rep"];
+        const tomorrowMeasurement = responseObject["SiteRep"]["DV"]["Location"]["Period"][1]["Rep"];
+
+        const desiredMeasurements = [];
+        const desiredTimes = [0,3,6,9,12,24];
+        const itemPositions = [0,1,2,3,5,9];
+
+        itemsFromToday = todayMeasurement.length;
+        if (itemsFromToday > 5) {
+          itemsFromToday = 5;
+        } else if (itemsFromToday > 3) {
+          itemsFromToday = 3;
+        }
+
+        //needs to run up until the last desired item stored in today's measurements set
+        for (let i = 0; i < itemPositions.indexOf(itemsFromToday); i++) {
+          //skip the measurements i don't want to include
+          if ([4,6,7,8].includes(i)) {
+            continue;
+          }
+          //console.log("i".concat(i.toString()));
+          desiredMeasurements.push(todayMeasurement[i]);
+          desiredTimes[itemPositions.indexOf(i)] = ((desiredTimes[itemPositions.indexOf(i)] + parseInt(timeOfMeasurement)) % 24).toString();
+          //set 24:00 to 00:00
+          if (desiredTimes[i] == "24") {
+            desiredTimes[i] = "00";
+          }
+        }
+
+        //the 9th measurement is the latest possible measurement we take from tomorrow
+        //DO NOT EVEN NEED THIS??
+        //itemsFromTomorrow = itemPositions.indexOf(9) + 1 - itemsFromToday;
+
+        //runs from indexOf(itemsFromToday) -> highest # item from tomorrow (9)
+        //j is counting the rep item number
+        for (let j = itemPositions.indexOf(itemsFromToday); j <= 9; j++) {
+          //skip the measurements i don't want to include
+          if ([4,6,7,8].includes(j)) {
+            continue;
+          }
+          //console.log("j".concat(j.toString()));
+          //item number j is found at tomorrowMeasurement[j - itemsFromToday]
+          desiredMeasurements.push(tomorrowMeasurement[j - itemsFromToday]);
+          desiredTimes[itemPositions.indexOf(j)] = ((desiredTimes[itemPositions.indexOf(j)] + parseInt(timeOfMeasurement)) % 24).toString();
+          //set 24:00 to 00:00
+          if (desiredTimes[j] == "24") {
+            desiredTimes[j] = "00";
+          }
+        }
+
+        console.log("Final array:");
+        console.log(desiredMeasurements);
+        console.log("Final times: ");
+        console.log(desiredTimes);
+
+        for (let x = 0; x < desiredMeasurements.length; x++) {
+          weatherInfoArray.push(evaluateDataPoint(desiredMeasurements[x],desiredTimes[x]));
+        }
 
         generateWeatherTable(weatherInfoArray);
 
@@ -114,57 +172,45 @@ function evaluateDataPoint(rep, measuredTime) {
 
   //WIND SPEED
   if (speed.data > speed.red) {
-    console.log("RED WIND SPEED");
     weatherInfo.speed[0] = speed.data;
     weatherInfo.speed[1] = "R";
   } else if (speed.data > speed.amber) {
-    console.log("AMBER WIND SPEED");
     weatherInfo.speed[0] = speed.data;
     weatherInfo.speed[1] = "A";
   } else {
-    console.log("GREEN WIND SPEED");
     weatherInfo.speed[0] = speed.data;
     weatherInfo.speed[1] = "G";
   }
 
   //WIND GUST
   if (gust.data > gust.red) {
-    console.log("RED WIND GUST");
     weatherInfo.gust[0] = gust.data;
     weatherInfo.gust[1] = "R";
   } else if (gust.data > gust.amber) {
-    console.log("AMBER WIND GUST");
     weatherInfo.gust[0] = gust.data;
     weatherInfo.gust[1] = "A";
   } else {
-    console.log("GREEN WIND GUST");
     weatherInfo.gust[0] = gust.data;
     weatherInfo.gust[1] = "G";
   }
 
   //TEMPERATURE
   if (temp.data > temp.redHigh) {
-    console.log("RED TEMPERATURE (HIGH");
     weatherInfo.temp[0] = temp.data;
     weatherInfo.temp[1] = "RH";
   } else if (temp.data > temp.amberHigh) {
-    console.log("AMBER TEMPERATURE (HIGH");
     weatherInfo.temp[0] = temp.data;
     weatherInfo.temp[1] = "AH";
   } else if (temp.data >= temp.green) {
-    console.log("GREEN TEMPERATURE");
     weatherInfo.temp[0] = temp.data;
     weatherInfo.temp[1] = "G";
   } else if (temp.data > temp.amberLow) {
-    console.log("AMBER TEMPERATURE (LOW)");
     weatherInfo.temp[0] = temp.data;
     weatherInfo.temp[1] = "AL";
   } else if (temp.data >= temp.redLow) {
-    console.log("AMBER TEMPERATURE (LOW) - EXPERIENCED COXLESS BOATS ONLY");
     weatherInfo.temp[0] = temp.data;
     weatherInfo.temp[1] = "AL*"
   } else {
-    console.log("RED TEMPERATURE (LOW)");
     weatherInfo.temp[0] = temp.data;
     weatherInfo.temp[1] = "RL";
   }
@@ -172,56 +218,45 @@ function evaluateDataPoint(rep, measuredTime) {
   //WEATHER TYPE
   //RAIN
   if (rain.data == rain.red) {
-    console.log("RED RAIN");
     weatherInfo.rain[0] = rain.data;
     weatherInfo.rain[1] = "R";
   } else if (rain.data == rain.amber) {
-    console.log("AMBER RAIN");
     weatherInfo.rain[0] = rain.data;
     weatherInfo.rain[1] = "A";
   } else {
-    console.log("GREEN RAIN");
     weatherInfo.rain[0] = rain.data;
     weatherInfo.rain[1] = "G";
   }
 
   //SNOW
   if (snow.data == snow.red) {
-    console.log("RED SNOW");
     weatherInfo.snow[0] = snow.data;
     weatherInfo.snow[1] = "R";
   } else if (snow.data == snow.amber) {
-    console.log("AMBER SNOW");
     weatherInfo.snow[0] = snow.data;
     weatherInfo.snow[1] = "A";
   } else {
-    console.log("GREEN SNOW");
     weatherInfo.snow[0] = snow.data;
     weatherInfo.snow[1] = "G";
   }
 
   //ELECTRICAL STORMS
   if (electricalStorms.red.includes(electricalStorms.data)) {
-    console.log("RED ELECTRICAL STORMS");
     weatherInfo.electricalStorms[0] = electricalStorms.data;
     weatherInfo.electricalStorms[1] = "R";
   } else {
-    console.log("GREEN ELECTRICAL STORMS");
     weatherInfo.electricalStorms[0] = electricalStorms.data;
     weatherInfo.electricalStorms[1] = "G";
   }
 
   //VISIBILITY
   if (visibility.data == visibility.red) {
-    console.log("RED VISIBILITY");
     weatherInfo.visibility[0] = visibility.data;
     weatherInfo.visibility[1] = "R";
   } else if (visibility.data == visibility.amber) {
-    console.log("AMBER VISIBILITY");
     weatherInfo.visibility[0] = visibility.data;
     weatherInfo.visibility[1] = "A";
   } else {
-    console.log("GREEN VISIBILITY");
     weatherInfo.visibility[0] = visibility.data;
     weatherInfo.visibility[1] = "G";
   }
@@ -273,7 +308,19 @@ function generateWeatherTable(weatherInfo) {
 
     //FEELS LIKE TEMPERATURE
     const tempText = weatherInfoArray[i].temp[0].toString().concat(" °C");
-    createCells(tempText);
+    if (weatherInfoArray[i].temp[1] == "RH") {
+      createCells("Too High: ".concat(tempText));
+    } else if (weatherInfoArray[i].temp[1] == "AH") {
+      createCells("High: ".concat(tempText));
+    } else if (weatherInfoArray[i].temp[1] == "AL") {
+      createCells("Low: ".concat(tempText));
+    } else if (weatherInfoArray[i].temp[1] == "AL*") {
+      createCells("Low (experienced coxless boats only): ".concat(tempText));
+    } else if (weatherInfoArray[i].temp[1] == "RL") {
+      createCells("Too Low: ".concat(tempText));
+    } else {
+      createCells("Okay: ".concat(tempText));
+    }
 
     //RAIN
     if (weatherInfoArray[i].rain[1] == "R") {
