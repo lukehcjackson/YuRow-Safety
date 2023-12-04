@@ -1,0 +1,40 @@
+table {
+    border-collapse: collapse;
+    text-align: center;
+	vertical-align: middle;
+  }
+  
+  th, td {
+    border: 1px solid black;
+    padding: 8px;
+    background-color: lightgrey;
+  }
+
+  thead {
+    background-color: lightgrey;
+  }
+
+  a {
+    font-size: 20px;
+    font-weight: bold;
+    color: black;
+  }
+
+  #weatherDiv {
+    display: flex;
+    width: 90%;
+    padding: 10px;
+  }
+
+  #weatherTable {
+    flex: 3;
+    margin-right: 30px;
+  }
+
+  #weatherKey {
+    flex: 1;
+    margin-bottom: 200px;
+  }
+
+
+  

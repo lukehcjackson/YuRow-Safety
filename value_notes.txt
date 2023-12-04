@@ -32,8 +32,9 @@ JSON FORMAT:
             Green: Good visibility. Amber: 250m visibility. (V=PO) Red: 5m visibility (V=VP)
 
 Doing a 3-hourly 5 day forecast means I can use:
-Current values (item 1)
-Values in 3 hours (item 2)
+Current values (item 0)
+Values in 3 hours (iemm 1)
+Values in 6 hours (item 2)
 Values in 12 hours (item 5)
 Values in 24 hours (9)
 Values in 48 hours (17)

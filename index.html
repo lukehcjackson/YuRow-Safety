@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="main.css", rel="stylesheet">
     <title>YuRow Safety</title>
 </head>
 <body onload="callDataPointAPI()">
@@ -34,36 +35,43 @@
         Also displays CURRENT weather conditions by default but should be
         able to determine future weather predictions at a given time-->
 
-        <table id="weatherTable">
-            <!-- HEADINGS-->
-            <thead>
+        <br>
+        <br>
+
+        <div id="weatherDiv">
+            <table id="weatherTable">
+                <!-- HEADINGS-->
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Wind Speed</th>
+                        <th>Wind Gust</th>
+                        <th>Feels Like Temperature</th>
+                        <th>Rain</th>
+                        <th>Snow</th>
+                        <th>Electrical Storms</th>
+                        <th>Visibility</th>
+                    </tr>
+                </thead>
+            </table>
+
+            <table id="weatherKey">
                 <tr>
-                    <th>Time</th>
-                    <th>Wind Speed</th>
-                    <th>Wind Gust</th>
-                    <th>Feels Like Temperature</th>
-                    <th>Rain</th>
-                    <th>Snow</th>
-                    <th>Electrical Storms</th>
-                    <th>Visibility</th>
+                    <th style="background-color: #8CD47E;">Green</th>
+                    <th>All boats can go out</th>
                 </tr>
-            </thead>
-            
+                <tr>
+                    <th style="background-color: #FFB54C;">Orange</th>
+                    <th>Extra precautions to be taken</th>
+                </tr>
+                <tr>
+                    <th style="background-color: #FF6961;">Red</th>
+                    <th>No boats can go out</th>
+                </tr>
+            </table>
 
-            <!--CURRENT WEATHER-->
-
-            <!--3HR WEATHER-->
-
-            <!--12HR WEATHER-->
-
-            <!--24HR WEATHER-->
-
-            <!--48HR WEATHER-->
-
-
-
-        </table>
-
+        </div>
+        
     </div>
 
 </body>

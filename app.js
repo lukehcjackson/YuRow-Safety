@@ -57,7 +57,6 @@ function callDataPointAPI() {
           if ([4,6,7,8].includes(i)) {
             continue;
           }
-          //console.log("i".concat(i.toString()));
           desiredMeasurements.push(todayMeasurement[i]);
           desiredTimes[itemPositions.indexOf(i)] = ((desiredTimes[itemPositions.indexOf(i)] + parseInt(timeOfMeasurement)) % 24).toString();
           //set 24:00 to 00:00
@@ -66,10 +65,6 @@ function callDataPointAPI() {
           }
         }
 
-        //the 9th measurement is the latest possible measurement we take from tomorrow
-        //DO NOT EVEN NEED THIS??
-        //itemsFromTomorrow = itemPositions.indexOf(9) + 1 - itemsFromToday;
-
         //runs from indexOf(itemsFromToday) -> highest # item from tomorrow (9)
         //j is counting the rep item number
         for (let j = itemPositions.indexOf(itemsFromToday); j <= 9; j++) {
@@ -77,7 +72,6 @@ function callDataPointAPI() {
           if ([4,6,7,8].includes(j)) {
             continue;
           }
-          //console.log("j".concat(j.toString()));
           //item number j is found at tomorrowMeasurement[j - itemsFromToday]
           desiredMeasurements.push(tomorrowMeasurement[j - itemsFromToday]);
           desiredTimes[itemPositions.indexOf(j)] = ((desiredTimes[itemPositions.indexOf(j)] + parseInt(timeOfMeasurement)) % 24).toString();
@@ -86,11 +80,6 @@ function callDataPointAPI() {
             desiredTimes[j] = "00";
           }
         }
-
-        console.log("Final array:");
-        console.log(desiredMeasurements);
-        console.log("Final times: ");
-        console.log(desiredTimes);
 
         for (let x = 0; x < desiredMeasurements.length; x++) {
           weatherInfoArray.push(evaluateDataPoint(desiredMeasurements[x],desiredTimes[x]));
@@ -167,16 +156,24 @@ function evaluateDataPoint(rep, measuredTime) {
     rain: [],
     snow: [],
     electricalStorms: [],
-    visibility: []
+    visibility: [],
+    timeSev: 1
   }
+
+  //this array will be used to style the time column
+  //stores a numeric value associated with each column's severity
+  //then the max of this array will be the largest severity
+  maxSev = [1];
 
   //WIND SPEED
   if (speed.data > speed.red) {
     weatherInfo.speed[0] = speed.data;
     weatherInfo.speed[1] = "R";
+    maxSev.push(3);
   } else if (speed.data > speed.amber) {
     weatherInfo.speed[0] = speed.data;
     weatherInfo.speed[1] = "A";
+    maxSev.push(2);
   } else {
     weatherInfo.speed[0] = speed.data;
     weatherInfo.speed[1] = "G";
@@ -186,9 +183,11 @@ function evaluateDataPoint(rep, measuredTime) {
   if (gust.data > gust.red) {
     weatherInfo.gust[0] = gust.data;
     weatherInfo.gust[1] = "R";
+    maxSev.push(3);
   } else if (gust.data > gust.amber) {
     weatherInfo.gust[0] = gust.data;
     weatherInfo.gust[1] = "A";
+    maxSev.push(2);
   } else {
     weatherInfo.gust[0] = gust.data;
     weatherInfo.gust[1] = "G";
@@ -198,21 +197,26 @@ function evaluateDataPoint(rep, measuredTime) {
   if (temp.data > temp.redHigh) {
     weatherInfo.temp[0] = temp.data;
     weatherInfo.temp[1] = "RH";
+    maxSev.push(3);
   } else if (temp.data > temp.amberHigh) {
     weatherInfo.temp[0] = temp.data;
     weatherInfo.temp[1] = "AH";
+    maxSev.push(2);
   } else if (temp.data >= temp.green) {
     weatherInfo.temp[0] = temp.data;
     weatherInfo.temp[1] = "G";
   } else if (temp.data > temp.amberLow) {
     weatherInfo.temp[0] = temp.data;
     weatherInfo.temp[1] = "AL";
+    maxSev.push(2);
   } else if (temp.data >= temp.redLow) {
     weatherInfo.temp[0] = temp.data;
     weatherInfo.temp[1] = "AL*"
+    maxSev.push(2);
   } else {
     weatherInfo.temp[0] = temp.data;
     weatherInfo.temp[1] = "RL";
+    maxSev.push(3);
   }
 
   //WEATHER TYPE
@@ -220,9 +224,11 @@ function evaluateDataPoint(rep, measuredTime) {
   if (rain.data == rain.red) {
     weatherInfo.rain[0] = rain.data;
     weatherInfo.rain[1] = "R";
+    maxSev.push(3);
   } else if (rain.data == rain.amber) {
     weatherInfo.rain[0] = rain.data;
     weatherInfo.rain[1] = "A";
+    maxSev.push(2);
   } else {
     weatherInfo.rain[0] = rain.data;
     weatherInfo.rain[1] = "G";
@@ -232,9 +238,11 @@ function evaluateDataPoint(rep, measuredTime) {
   if (snow.data == snow.red) {
     weatherInfo.snow[0] = snow.data;
     weatherInfo.snow[1] = "R";
+    maxSev.push(3);
   } else if (snow.data == snow.amber) {
     weatherInfo.snow[0] = snow.data;
     weatherInfo.snow[1] = "A";
+    maxSev.push(2);
   } else {
     weatherInfo.snow[0] = snow.data;
     weatherInfo.snow[1] = "G";
@@ -244,6 +252,7 @@ function evaluateDataPoint(rep, measuredTime) {
   if (electricalStorms.red.includes(electricalStorms.data)) {
     weatherInfo.electricalStorms[0] = electricalStorms.data;
     weatherInfo.electricalStorms[1] = "R";
+    maxSev.push(3);
   } else {
     weatherInfo.electricalStorms[0] = electricalStorms.data;
     weatherInfo.electricalStorms[1] = "G";
@@ -253,28 +262,36 @@ function evaluateDataPoint(rep, measuredTime) {
   if (visibility.data == visibility.red) {
     weatherInfo.visibility[0] = visibility.data;
     weatherInfo.visibility[1] = "R";
+    maxSev.push(3);
   } else if (visibility.data == visibility.amber) {
     weatherInfo.visibility[0] = visibility.data;
     weatherInfo.visibility[1] = "A";
+    maxSev.push(2);
   } else {
     weatherInfo.visibility[0] = visibility.data;
     weatherInfo.visibility[1] = "G";
   }
 
-  return weatherInfo;
+  weatherInfo.timeSev = Math.max.apply(Math, maxSev);
 
-  //generateWeatherTable(weatherInfo);
-  //weatherInfoArray.push(weatherInfo);
-  //generateWeatherTable(weatherInfoArray);
+  return weatherInfo;
 
 }
 
-function createCells(text) {
+function createCells(text, sev) {
   const cell = document.createElement("td");
   const cellText = document.createTextNode(text);
   cell.appendChild(cellText);
+
+  if (sev == "R") {
+    cell.style.backgroundColor = "#FF6961";
+  } else if (sev == "A") {
+    cell.style.backgroundColor = "#FFB54C";
+  } else {
+    cell.style.backgroundColor = "#8CD47E";
+  }
+
   row.appendChild(cell);
-  console.log("created cell");
 }
 
 function generateWeatherTable(weatherInfo) {
@@ -296,73 +313,77 @@ function generateWeatherTable(weatherInfo) {
     //HAVE TO DO THIS MANUALLY BECAUSE YOU CAN'T ACCESS OBJECT'S PROPERTIES BY INDEX :(
     //TIME:
     const timeText = weatherInfoArray[i].time.concat(":00");
-    createCells(timeText);
-  
+    if (weatherInfoArray[i].timeSev == 3) {
+      createCells(timeText, "R");
+    } else if (weatherInfoArray[i].timeSev == 2) {
+      createCells(timeText, "A");
+    } else {
+      createCells(timeText);
+    }
+    
     //WIND SPEED:
     const speedText = weatherInfoArray[i].speed[0].toString().concat(" mph");
-    createCells(speedText);
+    createCells(speedText, weatherInfoArray[i].speed[1]);
 
     //WIND GUST:
     const gustText = weatherInfoArray[i].gust[0].toString().concat(" mph");
-    createCells(gustText);
+    createCells(gustText, weatherInfoArray[i].gust[1]);
 
     //FEELS LIKE TEMPERATURE
     const tempText = weatherInfoArray[i].temp[0].toString().concat(" °C");
     if (weatherInfoArray[i].temp[1] == "RH") {
-      createCells("Too High: ".concat(tempText));
+      createCells("Too High: ".concat(tempText), "R");
     } else if (weatherInfoArray[i].temp[1] == "AH") {
-      createCells("High: ".concat(tempText));
+      createCells("High: ".concat(tempText), "A");
     } else if (weatherInfoArray[i].temp[1] == "AL") {
-      createCells("Low: ".concat(tempText));
+      createCells("Low: ".concat(tempText), "A");
     } else if (weatherInfoArray[i].temp[1] == "AL*") {
-      createCells("Low (experienced coxless boats only): ".concat(tempText));
+      createCells("Low (experienced coxless boats only): ".concat(tempText), "A");
     } else if (weatherInfoArray[i].temp[1] == "RL") {
-      createCells("Too Low: ".concat(tempText));
+      createCells("Too Low: ".concat(tempText),"R");
     } else {
-      createCells("Okay: ".concat(tempText));
+      createCells("Okay: ".concat(tempText),"G");
     }
 
     //RAIN
     if (weatherInfoArray[i].rain[1] == "R") {
-      createCells("Heavy rain");
+      createCells("Heavy rain", "R");
     } else if (weatherInfoArray[i].rain[1] == "A") {
-      createCells("Moderate rain");
+      createCells("Moderate rain", "A");
     } else {
-      createCells("Okay");
+      createCells("Okay", "G");
     }
 
     //SNOW
     if (weatherInfoArray[i].snow[1] == "R") {
-      createCells("Heavy snow");
+      createCells("Heavy snow", "R");
     } else if (weatherInfoArray[i].snow[1] == "A") {
-      createCells("Moderate snow");
+      createCells("Moderate snow", "A");
     } else {
-      createCells("Okay");
+      createCells("Okay", "G");
     }
 
     //ELECTRICAL STORMS
     if (weatherInfoArray[i].electricalStorms[1] == "R") {
-      createCells("Electrical storms likely");
+      createCells("Electrical storms likely", "R");
     } else {
-      createCells("Okay");
+      createCells("Okay", "G");
     }
 
     //VISIBILITY
     if (weatherInfoArray[i].visibility[1] == "R") {
-      createCells("Very Poor Visibility");
+      createCells("Very Poor Visibility", "R");
     } else if (weatherInfoArray[i].visibility[1] == "A") {
-        createCells("Poor Visibility");
+        createCells("Poor Visibility", "A");
     } else {
-      createCells("Okay");
+      createCells("Okay", "G");
     }
     
-
     // add the row to the end of the table body
     tblBody.appendChild(row);
 
   }
   //append the body to the table
   weatherTable.appendChild(tblBody);
-  console.log("done");
 
 }
