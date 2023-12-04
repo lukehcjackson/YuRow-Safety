@@ -31,13 +31,15 @@ JSON FORMAT:
           VISIBILITY (V):
             Green: Good visibility. Amber: 250m visibility. (V=PO) Red: 5m visibility (V=VP)
 
-Doing a 3-hourly 5 day forecast means I can use:
-Current values (item 0)
-Values in 3 hours (iemm 1)
-Values in 6 hours (item 2)
-Values in 12 hours (item 5)
-Values in 24 hours (9)
-Values in 48 hours (17)
+Rethinking the times that I care about:
+current measurement
+6am tomorrow
+7am tomorrow *
+8am tomorrow
+1pm tomorrow
+2pm tomorrow *
+3pm tomorrow
+want to work out the closest measurements to these times, in particular the starred times
 
 SiteRep -> DV -> Period -> [DAY] -> [VALUE SET]
 Essentially want the Rep values for the times listed above

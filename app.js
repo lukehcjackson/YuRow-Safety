@@ -31,15 +31,94 @@ function callDataPointAPI() {
         const Tpos = timeOfMeasurement.indexOf("T");
         timeOfMeasurement = timeOfMeasurement.slice(Tpos+1, Tpos+3);
 
-        //process the Rep value for the current weather information
-        const current = responseObject["SiteRep"]["DV"]["Location"]["Period"][0]["Rep"][0];
-        //weatherInfoArray.push(evaluateDataPoint(current, timeOfMeasurement));
-
-        
-        //[0]   [1]   [2]   [3]      [5]      [9]      [17]
         const todayMeasurement = responseObject["SiteRep"]["DV"]["Location"]["Period"][0]["Rep"];
         const tomorrowMeasurement = responseObject["SiteRep"]["DV"]["Location"]["Period"][1]["Rep"];
 
+        //combine the two JSON objects
+        let todayMeasurementString = JSON.stringify(todayMeasurement);
+        todayMeasurementString = todayMeasurementString.slice(0,todayMeasurementString.length-1);
+        const tomorrowMeasurementString = JSON.stringify(tomorrowMeasurement).slice(1);
+        const combinedMeasurementString = todayMeasurementString.concat(",").concat(tomorrowMeasurementString);
+        const combinedMeasurement = JSON.parse(combinedMeasurementString);
+        
+        //want to use these two measurement sets to find times around 7am and 2pm the next day in particular
+        const desiredMeasurements = [];
+        //we do not know where these times will come in the set so work it out from the current time
+        const timesOfAllMeasurements = [];
+        for (let i = 0; i < combinedMeasurement.length; i++) {
+          timesOfAllMeasurements[i] = (parseInt(timeOfMeasurement) + (3*i)) % 24;
+        }
+
+        const idealTimes = [6,7,8,13,14,15];
+        for (let j = 0; j < idealTimes.length; j++) {
+          desiredMeasurements.push(timesOfAllMeasurements.lastIndexOf(idealTimes[j]));
+        }
+
+        //first thing we want is the current and next measurement
+        const measurementSet = [];
+        const measurementTimes = [];
+        for (let m = 0; m < 2; m++) {
+          measurementSet.push(combinedMeasurement[m]);
+          measurementTimes[m] = (timesOfAllMeasurements[m]);
+        }        
+
+        //for each element in desiredMeasurements we want the measurements at that time, and also the ones before and after it
+        for (let k = 0; k < desiredMeasurements.length; k++) {
+          if (desiredMeasurements[k] != -1) {
+            //to keep them in the right order, first try to get the measurement before the one that we know for sure we can
+            try {
+              //if those elements are already in the table, then don't add them!
+              if (!measurementSet.includes(combinedMeasurement[desiredMeasurements[k]-1])) {
+                measurementSet.push(combinedMeasurement[desiredMeasurements[k]-1]);
+                measurementTimes.push(timesOfAllMeasurements[desiredMeasurements[k]-1]);
+              }
+            }
+            catch {
+              console.log("No measurement before desired");
+            }
+
+            //get the rep values from the k'th index of combinedMeasurement
+            if (!measurementSet.includes(combinedMeasurement[desiredMeasurements[k]])) { 
+              measurementSet.push(combinedMeasurement[desiredMeasurements[k]]);
+              measurementTimes.push(timesOfAllMeasurements[desiredMeasurements[k]]);
+            }
+            
+            //also get the measurement after it if available
+            try {
+              if (!measurementSet.includes(combinedMeasurement[desiredMeasurements[k]+1])) { 
+                measurementSet.push(combinedMeasurement[desiredMeasurements[k]+1]);
+                measurementTimes.push(timesOfAllMeasurements[desiredMeasurements[k]+1]);
+              }
+            }
+            catch {
+              console.log("No measurement after desired");
+            }
+          }
+          
+
+        }
+
+        //PASS THROUGH TIMES TO CONVERT 24->00:00 AND ADD LEADING ZEROES TO SINGLE DIGIT TIMES
+        //ALSO NEED TO STORE TIMES AS STRING
+
+        for (let y = 0; y < measurementTimes.length; y++) {
+          if (measurementTimes[y] == 24) {
+            measurementTimes[y] = 0;
+          }
+          //convert to string and add leading zeroes
+          if (measurementTimes[y] < 10) {
+            measurementTimes[y] = "0".concat(measurementTimes[y].toString());
+          } else {
+            measurementTimes[y] = measurementTimes[y].toString();
+          }
+        }
+
+        for (let x = 0; x < measurementSet.length; x++) {
+          weatherInfoArray.push(evaluateDataPoint(measurementSet[x],measurementTimes[x]));
+        }
+
+
+        /* THIS IS THE FIRST SOLUTION
         const desiredMeasurements = [];
         const desiredTimes = [0,3,6,9,12,24];
         const itemPositions = [0,1,2,3,5,9];
@@ -80,10 +159,12 @@ function callDataPointAPI() {
             desiredTimes[j] = "00";
           }
         }
+        
 
         for (let x = 0; x < desiredMeasurements.length; x++) {
           weatherInfoArray.push(evaluateDataPoint(desiredMeasurements[x],desiredTimes[x]));
         }
+        */
 
         generateWeatherTable(weatherInfoArray);
 
