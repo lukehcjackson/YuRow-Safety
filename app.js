@@ -46,10 +46,14 @@ function callDataPointAPI() {
         //we do not know where these times will come in the set so work it out from the current time
         const timesOfAllMeasurements = [];
         for (let i = 0; i < combinedMeasurement.length; i++) {
-          timesOfAllMeasurements[i] = (parseInt(timeOfMeasurement) + (3*i)) % 24;
+          timesOfAllMeasurements[i] = (parseInt(timeOfMeasurement) + (3*i));
         }
 
-        const idealTimes = [6,7,8,13,14,15];
+        //const idealTimes = [6,7,8,13,14,15];
+        const idealTimes = [30,31,32,37,38,39];
+        //idealTimes above reflects the times we want to take measurements
+        //but since we aren't doing %24 to find the hour on the day, each value has 24hrs added onto it
+        //to reflect that it's a time from tomorrow
         for (let j = 0; j < idealTimes.length; j++) {
           desiredMeasurements.push(timesOfAllMeasurements.lastIndexOf(idealTimes[j]));
         }
@@ -100,8 +104,28 @@ function callDataPointAPI() {
 
         //PASS THROUGH TIMES TO CONVERT 24->00:00 AND ADD LEADING ZEROES TO SINGLE DIGIT TIMES
         //ALSO NEED TO STORE TIMES AS STRING
+        //TODO: ADD DATES TO TIMES
+        let date = new Date();
+        let todayDate = (date.getDate().toString()).concat("/").concat((date.getMonth() + 1).toString()); 
+        date.setDate(date.getDate() + 1)
+        let tomorrowDate = (date.getDate().toString()).concat("/").concat((date.getMonth() + 1).toString());
+        console.log(todayDate);
+        console.log(tomorrowDate);
+
+        measurementDays = []
 
         for (let y = 0; y < measurementTimes.length; y++) {
+          //calculate the day
+          if (measurementTimes[y] < 24) {
+            measurementDays[y] = todayDate.concat(" ");
+          } else {
+            measurementDays[y] = tomorrowDate.concat(" ");
+          }
+
+          //do mod 24 to get actual times
+          measurementTimes[y] = measurementTimes[y] % 24;
+
+          //convert 24:00 to 00:00
           if (measurementTimes[y] == 24) {
             measurementTimes[y] = 0;
           }
@@ -111,6 +135,10 @@ function callDataPointAPI() {
           } else {
             measurementTimes[y] = measurementTimes[y].toString();
           }
+
+          //add the date to the time
+          measurementTimes[y] = measurementDays[y].concat(measurementTimes[y]);
+          
         }
 
         for (let x = 0; x < measurementSet.length; x++) {
