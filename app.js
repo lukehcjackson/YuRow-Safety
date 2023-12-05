@@ -1,3 +1,15 @@
+function loadEverything() {
+  callDataPointAPI();
+  loadRiverLevel();
+}
+
+function loadRiverLevel() {
+  console.log("load river height");
+  var iframe = document.getElementById("iframe");
+  var div = document.getElementById("riverHeight");
+  div.innerHTML = iframe.contentWindow.document.getElementById("hour_chart").innerHTML;
+}
+
 function callDataPointAPI() {
 
     //weatherInfoArray stores multiple weatherInfo objects

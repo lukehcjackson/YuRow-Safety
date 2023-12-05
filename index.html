@@ -6,7 +6,7 @@
     <link href="main.css", rel="stylesheet">
     <title>YuRow Safety</title>
 </head>
-<body onload="callDataPointAPI()">
+<body onload="loadEverything()">
     <header>
         <h1>YuRow Safety Information</h1>
     </header>
@@ -18,10 +18,8 @@
     <div>
         <h1>River Height</h1>
         <h2>Information measured from the Viking Recorder</h2>
-        <!-- WANT: Dynamic table that reflects current water level,
-        and which boats can currently go out.
-        By default, displays CURRENT water level, but should take user
-        input and use that to determine the water level at a given time.-->
+        <div id="riverHeight"></div>
+        <iframe id="iframe" src="https://riverlevels.uk/river-ouse-york-viking-recorder/#hour_chart" width="1000" height="400" style="display:hidden;"></iframe>
     </div>
 
     <br>
@@ -32,11 +30,6 @@
         <br>
         <h3>This information updates hourly, but forecasts are only provided for every 3 hours.</h3>
         <h3>If you want a time that's not listed below, check back in an hour or two!</h3>
-        <!-- WANT: Also a dynamic table reflecting the different weather
-        conditions. If any conditions are severe enough to cause concern
-        or cancellation, bring them to the top of the table.
-        Also displays CURRENT weather conditions by default but should be
-        able to determine future weather predictions at a given time-->
 
         <br>
 
