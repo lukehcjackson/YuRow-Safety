@@ -9,23 +9,15 @@
 <body onload="loadEverything()">
     <header>
         <h1>YuRow Safety Information</h1>
+        <h3>Contact: luke.hc.jackson@gmail.com</h3>
     </header>
     <script src="app.js"></script>
     <noscript>You need to enable JavaScript to use this website.</noscript>
 
     <br>
 
-    <div>
-        <h1>River Height</h1>
-        <h2>Information measured from the Viking Recorder</h2>
-        <div id="riverHeight"></div>
-        <iframe id="iframe" src="https://riverlevels.uk/river-ouse-york-viking-recorder/#hour_chart" width="1000" height="400" style="display:hidden;"></iframe>
-    </div>
-
-    <br>
-
-    <div>
-        <h1>Weather Conditions</h1>
+    <div class="box">
+        <h1 class="titleText">Weather Conditions</h1>
         <a href="https://www.metoffice.gov.uk/services/data/datapoint">Information from Met Office DataPoint API</a>
         <br>
         <h3>This information updates hourly, but forecasts are only provided for every 3 hours.</h3>
@@ -34,7 +26,7 @@
         <br>
 
         <div id="weatherDiv">
-            <table id="weatherTable">
+            <table class="rounded-corners" id="weatherTable">
                 <!-- HEADINGS-->
                 <thead>
                     <tr>
@@ -50,7 +42,7 @@
                 </thead>
             </table>
 
-            <table id="weatherKey">
+            <table id="weatherKey" class="key">
                 <tr>
                     <th style="background-color: #8CD47E;">Green</th>
                     <th>All boats can go out</th>
@@ -67,6 +59,19 @@
 
         </div>
         
+    </div>
+
+    <br>
+
+    <div class="box">
+        <h1 class="titleText">River Height</h1>
+        <a href="https://riverlevels.uk/river-ouse-york-viking-recorder">Information from riverlevels.uk using the Viking Recorder</a>
+
+        <br>
+        <br>
+
+        <div id="riverHeight"></div>
+        <iframe id="iframe" src="https://riverlevels.uk/river-ouse-york-viking-recorder/#hour_chart" width="1000" height="400" style="display:hidden;"></iframe>
     </div>
 
 </body>
