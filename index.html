@@ -4,12 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="main.css", rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Alegreya Sans' rel='stylesheet'>
     <title>YuRow Safety</title>
 </head>
 <body onload="loadEverything()">
     <header>
-        <h1>YuRow Safety Information</h1>
-        <h3>Contact: luke.hc.jackson@gmail.com</h3>
+        <div id="header-container">
+
+            <div class="header-image">
+                <img src="Assets/yurow-transparent.png" height="100" width="100">
+            </div>
+
+            <div class="header-text">
+                <h1>YuRow Safety Information</h1>
+                <h3>Contact: luke.hc.jackson@gmail.com</h3>
+            </div>
+
+            <div class="header-image">
+                <img src="Assets/yurow-transparent.png" height="100" width="100">
+            </div>
+            
+        </div>
+        
     </header>
     <script src="app.js"></script>
     <noscript>You need to enable JavaScript to use this website.</noscript>
@@ -17,13 +33,16 @@
     <br>
 
     <div class="box">
-        <h1 class="titleText">Weather Conditions</h1>
-        <a href="https://www.metoffice.gov.uk/services/data/datapoint">Information from Met Office DataPoint API</a>
-        <br>
-        <h3>This information updates hourly, but forecasts are only provided for every 3 hours.</h3>
-        <h3>If you want a time that's not listed below, check back in an hour or two!</h3>
+        <div class="subheading-box">
+            <h2 class="titleText">Weather Conditions</h2>
+        </div>
 
         <br>
+        
+        <a href="https://www.metoffice.gov.uk/services/data/datapoint">Information from Met Office DataPoint API</a>
+        <br>
+        <p>This information updates hourly, but forecasts are only provided for every 3 hours.</p>
+        <p>If you want a time that's not listed below, check back in an hour or two!</p>
 
         <div id="weatherDiv">
             <table class="rounded-corners" id="weatherTable">
@@ -45,15 +64,15 @@
             <table id="weatherKey" class="key">
                 <tr>
                     <th style="background-color: #8CD47E;">Green</th>
-                    <th>All boats can go out</th>
+                    <td>All boats can go out</td>
                 </tr>
                 <tr>
                     <th style="background-color: #FFB54C;">Orange</th>
-                    <th>Extra precautions to be taken</th>
+                    <td>Extra precautions to be taken</td>
                 </tr>
                 <tr>
                     <th style="background-color: #FF6961;">Red</th>
-                    <th>No boats can go out</th>
+                    <td>No boats can go out</td>
                 </tr>
             </table>
 
@@ -64,14 +83,19 @@
     <br>
 
     <div class="box">
-        <h1 class="titleText">River Height</h1>
+        <div class="subheading-box">
+            <h2 class="titleText">River Height</h2>
+        </div>
+
+        <br>
+        
         <a href="https://riverlevels.uk/river-ouse-york-viking-recorder">Information from riverlevels.uk using the Viking Recorder</a>
 
         <br>
         <br>
 
         <div id="riverHeight"></div>
-        <iframe id="iframe" src="https://riverlevels.uk/river-ouse-york-viking-recorder/#hour_chart" width="1000" height="400" style="display:hidden;"></iframe>
+        <iframe id="iframe" src="https://riverlevels.uk/river-ouse-york-viking-recorder/#hour_chart" width="100%" height="500px" style="display:hidden;"></iframe>
     </div>
 
 </body>
